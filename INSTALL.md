@@ -120,6 +120,19 @@ does and what it costs (~21 ms per tool call).
 
 ---
 
+## 5. Optional — let Claude drive the HUD
+
+A skill, a `/acc` slash command, and a hook that offers to start the HUD when a
+session begins:
+
+```bash
+cd claude-code && ./install-skills.sh      # Windows: .\install-skills.ps1
+```
+
+Restart Claude Code afterwards. See [SKILLS.md](SKILLS.md).
+
+---
+
 ## Upgrading
 
 Download the new bundle and run the installer again. It stops the daemon, replaces

@@ -17,7 +17,7 @@ that can stop a dangerous command *before* it runs.
 [![Platforms](https://img.shields.io/badge/macOS%20·%20Linux%20·%20Windows-ff5c4d?style=flat-square)](INSTALL.md)
 [![Runtime bundled](https://img.shields.io/badge/java-not%20required-a78bfa?style=flat-square)](INSTALL.md)
 
-[**Install**](INSTALL.md) · [**Guide**](GUIDE.md) · [**Releases**](https://github.com/NexusLayerEU/AgentControlCenter/releases) · [**Changelog**](release/CHANGELOG.md)
+[**Install**](INSTALL.md) · [**Guide**](GUIDE.md) · [**Skills**](SKILLS.md) · [**Releases**](https://github.com/NexusLayerEU/AgentControlCenter/releases) · [**Changelog**](release/CHANGELOG.md)
 
 <img src="docs/images/overview-dev.png" alt="ACC overview dashboard" width="100%">
 
@@ -104,8 +104,15 @@ acc attach     # start recording your own Claude Code sessions
 acc open
 ```
 
+Optional — let Claude drive the HUD for you:
+
+```bash
+cd claude-code && ./install-skills.sh    # adds a /acc command + a startup offer
+```
+
 Detailed instructions: [INSTALL.md](INSTALL.md).
 How to actually use it: [GUIDE.md](GUIDE.md).
+Claude Code integration: [SKILLS.md](SKILLS.md).
 
 ---
 
@@ -196,6 +203,7 @@ cd backend && mvn test           # 69 tests
 | `backend/` | Spring Boot daemon — agent runner, hook bridge, approval gate, stats |
 | `frontend/` | React dashboard — Vite, Tailwind v4, xterm.js, React Flow |
 | `release/` | Packaging; bundles a Temurin JRE per platform |
+| `claude-code/` | Optional Claude Code skill, `/acc` command and startup hook |
 | `acc` | Development control script |
 | `docs/DEVELOPMENT.md` | Architecture and API reference |
 

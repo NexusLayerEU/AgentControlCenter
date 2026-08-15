@@ -176,6 +176,20 @@ Append `?theme=dev` or `?theme=cyber` to link a specific one.
 
 ---
 
+## Letting Claude drive the HUD
+
+Install the optional integration and Claude gains a `/acc` command, plus the
+manners to offer starting the HUD when a session begins and stopping it when you
+say goodbye:
+
+```bash
+cd claude-code && ./install-skills.sh
+```
+
+Details, including how to silence the startup offer: [SKILLS.md](SKILLS.md).
+
+---
+
 ## The CLI
 
 ```
