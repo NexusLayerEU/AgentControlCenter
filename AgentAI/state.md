@@ -28,6 +28,9 @@
 - Published: https://github.com/NexusLayerEU/AgentControlCenter (public, MIT).
   README/INSTALL/GUIDE written, v0.2.0 release cut with all six bundles attached.
 
+- Claude Code integration published in `claude-code/` with cross-platform installers
+  and SKILLS.md; local ~/.claude copies kept identical to the repo.
+
 ## In Progress
 - Nothing.
 
