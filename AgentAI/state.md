@@ -25,6 +25,9 @@
 - Release 0.2.0 cut: version bumped everywhere, CHANGELOG added, all six bundles
   rebuilt from a clean tree and checksummed.
 
+- Published: https://github.com/NexusLayerEU/AgentControlCenter (public, MIT).
+  README/INSTALL/GUIDE written, v0.2.0 release cut with all six bundles attached.
+
 ## In Progress
 - Nothing.
 
