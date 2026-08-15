@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# Agent Control Center — control script for the local daemon.
+#
+#   ./acc build            build the dashboard and the daemon jar
+#   ./acc start            start the daemon in the background
+#   ./acc stop             stop it
+#   ./acc restart          stop, then start
+#   ./acc status           daemon + Claude Code + hook state
+#   ./acc dev              run the Vite dev server against a running daemon
+#   ./acc attach [dir]     register ACC's hooks in Claude Code
+#   ./acc detach           remove them again
+#   ./acc run "<task>" [dir] [mode]   dispatch an agent
+#   ./acc logs             tail the daemon log
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PORT="${ACC_PORT:-4000}"
+BASE="http://127.0.0.1:${PORT}"
+ACC_HOME="${ACC_HOME:-$HOME/.acc}"
+LOG="$ACC_HOME/daemon.log"
+PIDFILE="$ACC_HOME/daemon.pid"
+JAR="$ROOT/backend/target/acc-daemon-0.2.0.jar"
+
+# Spring Boot 3 needs 17+, and the machine default may well be older.
+if [ -z "${JAVA_HOME:-}" ] || ! "${JAVA_HOME}/bin/java" -version 2>&1 | grep -qE '"(1[7-9]|2[0-9])'; then
+  DETECTED="$(/usr/libexec/java_home -v 21 2>/dev/null || /usr/libexec/java_home -v 17 2>/dev/null || true)"
+  [ -n "$DETECTED" ] && export JAVA_HOME="$DETECTED"
+fi
+JAVA="${JAVA_HOME:+$JAVA_HOME/bin/}java"
+
+die() { printf '\033[31m%s\033[0m\n' "$*" >&2; exit 1; }
+info() { printf '\033[38;5;148m%s\033[0m\n' "$*"; }
+
+require_jar() { [ -f "$JAR" ] || die "Daemon jar missing. Run: ./acc build"; }
+
+is_up() { curl -s --max-time 2 "$BASE/api/system/status" >/dev/null 2>&1; }
+
+cmd_build() {
+  command -v npm >/dev/null || die "npm not found"
+  info "building dashboard…"
+  (cd "$ROOT/frontend" && npm install --silent && npm run build) || die "frontend build failed"
+  info "building daemon…"
+  # clean, so bundles deleted from the frontend build do not linger in the jar
+  (cd "$ROOT/backend" && mvn -B -q clean package) || die "backend build failed"
+  info "built $JAR"
+}
+
+cmd_start() {
+  require_jar
+  if is_up; then info "already running on :$PORT"; return 0; fi
+  mkdir -p "$ACC_HOME"
+  nohup "$JAVA" -jar "$JAR" >"$LOG" 2>&1 &
+  echo $! >"$PIDFILE"
+  for _ in $(seq 1 45); do
+    if is_up; then info "ACC up on $BASE"; return 0; fi
+    sleep 1
+  done
+  die "daemon did not come up; see $LOG"
+}
+
+cmd_stop() {
+  pkill -f 'acc-daemon-.*\.jar' 2>/dev/null && info "stopped" || info "not running"
+  rm -f "$PIDFILE"
+}
+
+cmd_status() {
+  if ! is_up; then info "daemon: down"; return 1; fi
+  curl -s "$BASE/api/system/status" | python3 -m json.tool
+  curl -s "$BASE/api/hooks/status?projectDir=$(pwd)" | python3 -m json.tool
+}
+
+cmd_attach() {
+  local dir="${1:-}"
+  if [ -n "$dir" ]; then
+    curl -s -X POST "$BASE/api/hooks/install" -H 'Content-Type: application/json' \
+      -d "{\"projectScope\":true,\"projectDir\":\"$dir\"}" | python3 -m json.tool
+  else
+    curl -s -X POST "$BASE/api/hooks/install" -H 'Content-Type: application/json' \
+      -d '{"projectScope":false}' | python3 -m json.tool
+  fi
+}
+
+cmd_detach() {
+  local dir="${1:-}"
+  if [ -n "$dir" ]; then
+    curl -s -X POST "$BASE/api/hooks/uninstall" -H 'Content-Type: application/json' \
+      -d "{\"projectScope\":true,\"projectDir\":\"$dir\"}" | python3 -m json.tool
+  else
+    curl -s -X POST "$BASE/api/hooks/uninstall" -H 'Content-Type: application/json' \
+      -d '{"projectScope":false}' | python3 -m json.tool
+  fi
+}
+
+cmd_run() {
+  [ $# -ge 1 ] || die 'usage: ./acc run "<task>" [dir] [default|acceptEdits|plan|bypassPermissions]'
+  local prompt="$1" dir="${2:-$(pwd)}" mode="${3:-default}"
+  python3 - "$BASE" "$prompt" "$dir" "$mode" <<'PY'
+import json, sys, urllib.request
+base, prompt, cwd, mode = sys.argv[1:5]
+body = json.dumps({"prompt": prompt, "cwd": cwd, "permissionMode": mode}).encode()
+req = urllib.request.Request(f"{base}/api/sessions", data=body,
+                             headers={"Content-Type": "application/json"}, method="POST")
+with urllib.request.urlopen(req, timeout=15) as r:
+    s = json.load(r)
+print(f"session {s['id']}  mode={s['permissionMode']}  auto-approve={s['autoApprove']}")
+print(f"watch it at {base}")
+PY
+}
+
+case "${1:-status}" in
+  build)   cmd_build ;;
+  start)   cmd_start ;;
+  stop)    cmd_stop ;;
+  restart) cmd_stop; sleep 1; cmd_start ;;
+  status)  cmd_status ;;
+  dev)     (cd "$ROOT/frontend" && npm run dev) ;;
+  attach)  shift; cmd_attach "$@" ;;
+  detach)  shift; cmd_detach "$@" ;;
+  run)     shift; cmd_run "$@" ;;
+  logs)    tail -f "$LOG" ;;
+  *)       sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' ;;
+esac

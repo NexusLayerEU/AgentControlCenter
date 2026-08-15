@@ -1,0 +1,6 @@
+82b30d56763295af36ece19ffccba17a8ebdffe884363bcaf7b230b222f96e94  acc-0.2.0-linux-aarch64.tar.gz
+fc51575895118fc494954ff032ee6ae958f29d93d330162bcc29726f1aa4c9d7  acc-0.2.0-linux-x64.tar.gz
+a9ff0f237e922f3fa10c87fd05764efdf3ada27e95db3f67c0364f6f899d16c4  acc-0.2.0-macos-aarch64.tar.gz
+73ad7d2fc2c52a2dee2f75f0b93cd6fb0c39c2dc0a1c0fc06a3dda506f3ac34f  acc-0.2.0-macos-x64.tar.gz
+522e4a16ceb1555145befeb85de5a45643c884ad5a0e1084ac86db8f09d0b441  acc-0.2.0-universal.zip
+653efac9d7274678fdc3282bc76bda25d03fa2bec7a7602c44ac1427e0623a41  acc-0.2.0-windows-x64.zip

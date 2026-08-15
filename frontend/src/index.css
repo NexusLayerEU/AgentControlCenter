@@ -1,0 +1,576 @@
+@import 'tailwindcss';
+@import '@xterm/xterm/css/xterm.css';
+@import '@xyflow/react/dist/style.css';
+
+/* ═══════════════════════════════════════════════════════════════
+   TWO DECKS, ONE TOKEN SYSTEM
+
+   DevTheme  — a 1970s instrument panel. Warm near-black, phosphor
+               lime, hairline rules. Calm, dense, legible.
+   Blackwire — a cracked terminal in a rain-soaked arcade. Violet
+               ink, hot magenta, CRT scanlines, glitch.
+
+   Every colour below is a ROLE, not a hue. The names come from
+   DevTheme's palette (that deck shipped first) but each slot means
+   the same thing in both themes:
+
+     live   → running / healthy      amber → waiting on a human
+     coral  → danger / failure       cyan  → tool call
+     violet → thinking
+
+   Blackwire fills those slots with entirely different hues, which is
+   why `--color-cyan` is violet there. Change a slot, not a name.
+   ═══════════════════════════════════════════════════════════════ */
+
+@theme {
+  --color-void: #08090a;
+  --color-deck: #0d0f10;
+  --color-deck-2: #131618;
+  --color-deck-3: #1a1e20;
+  --color-rule: #1f2427;
+  --color-rule-hot: #2d3438;
+
+  --color-ink: #e8e5dc;
+  --color-ink-dim: #8b918c;
+  --color-ink-faint: #565c58;
+
+  --color-live: #c6f24e;
+  --color-amber: #f2a93b;
+  --color-coral: #ff5c4d;
+  --color-cyan: #5ac8f2;
+  --color-violet: #a78bfa;
+
+  --font-display: 'Chakra Petch', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+}
+
+/* ── DevTheme ──────────────────────────────────────────────────
+   The @theme block above already carries these values; restating
+   them here means an explicit theme attribute always wins, and the
+   two decks read as siblings rather than base-plus-override. */
+
+:root,
+:root[data-theme='dev'] {
+  color-scheme: dark;
+
+  --glow-live: 0 0 0 1px rgb(198 242 78 / 0.28), 0 0 18px -4px rgb(198 242 78 / 0.45);
+  --glow-amber: 0 0 0 1px rgb(242 169 59 / 0.32), 0 0 20px -4px rgb(242 169 59 / 0.5);
+  --glow-coral: 0 0 0 1px rgb(255 92 77 / 0.35), 0 0 24px -4px rgb(255 92 77 / 0.55);
+
+  --grid-line: rgb(255 255 255 / 0.016);
+  --grid-size: 34px;
+  --grain-opacity: 0.035;
+  --scanline-opacity: 0;
+  --node-radius: 0px;
+  --label-shadow: none;
+  --accent-weight: 600;
+}
+
+/* ── Blackwire ─────────────────────────────────────────────────
+   Higher specificity than :root so ordering can never flip it. */
+
+:root[data-theme='cyber'] {
+  color-scheme: dark;
+
+  --color-void: #060309;
+  --color-deck: #0c0616;
+  --color-deck-2: #130a20;
+  --color-deck-3: #1b0f2b;
+  --color-rule: #2a1640;
+  --color-rule-hot: #4a2372;
+
+  /* Brighter than DevTheme's ink: neon surroundings raise the floor, so text
+     has to climb to stay legible against the bloom. */
+  --color-ink: #f4ecff;
+  --color-ink-dim: #b5a3e0;
+  --color-ink-faint: #7462a0;
+
+  --color-live: #00e5ff; /* running   — electric cyan */
+  --color-amber: #f5ff3d; /* waiting   — toxic yellow */
+  --color-coral: #ff2e88; /* danger    — hot magenta  */
+  --color-cyan: #b06bff; /* tool call — violet       */
+  --color-violet: #ff6bd6; /* thinking  — pink         */
+
+  --font-display: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* Blackwire glows harder — bloom is the point of the aesthetic. */
+  --glow-live: 0 0 0 1px rgb(0 229 255 / 0.5), 0 0 26px -3px rgb(0 229 255 / 0.75);
+  --glow-amber: 0 0 0 1px rgb(245 255 61 / 0.5), 0 0 26px -3px rgb(245 255 61 / 0.7);
+  --glow-coral: 0 0 0 1px rgb(255 46 136 / 0.55), 0 0 32px -3px rgb(255 46 136 / 0.85);
+
+  --grid-line: rgb(176 107 255 / 0.075);
+  --grid-size: 28px;
+  --grain-opacity: 0.05;
+  --scanline-opacity: 0.75;
+  --node-radius: 0px;
+  --label-shadow: 0 0 8px currentColor;
+  --accent-weight: 700;
+}
+
+/* ── Blackwire only: everything below this line is the aesthetic ─────────── */
+
+/* Vignette + corner bloom, painted by a dedicated overlay element so it does
+   not depend on which component happens to render first. */
+.atmosphere {
+  display: none;
+}
+:root[data-theme='cyber'] .atmosphere {
+  display: block;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgb(255 46 136 / 0.1), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgb(0 229 255 / 0.09), transparent 70%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgb(0 0 0 / 0.55) 100%);
+}
+
+/* Rules stop being hairlines and start being lit edges. */
+:root[data-theme='cyber'] header {
+  border-bottom-color: var(--color-coral);
+  box-shadow: 0 1px 18px -4px rgb(255 46 136 / 0.55);
+}
+
+/* A tool call's tone reads as an illuminated strip, not a 4px icon box. */
+:root[data-theme='cyber'] .tone-edge {
+  box-shadow: -1px 0 12px -2px currentColor;
+}
+
+/* Buttons ignite on hover rather than merely tinting. */
+:root[data-theme='cyber'] button:not(:disabled):hover {
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* The selected session gets a full neon spine. */
+:root[data-theme='cyber'] .spine {
+  box-shadow: 0 0 16px 1px var(--color-live);
+}
+
+/* Inputs glow when focused — the deck acknowledging you. */
+:root[data-theme='cyber'] input:focus,
+:root[data-theme='cyber'] textarea:focus {
+  box-shadow: 0 0 0 1px var(--color-live), 0 0 22px -4px var(--color-live);
+}
+
+/* Code and command previews read as terminal output. */
+:root[data-theme='cyber'] pre {
+  text-shadow: 0 0 6px color-mix(in oklab, currentColor 45%, transparent);
+}
+
+* {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-feature-settings: 'ss01', 'zero';
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  /* Theme swaps should feel like a machine changing mode, not a flash. */
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ── Atmosphere ────────────────────────────────────────────────
+   Engineering grid + film grain, fixed behind everything. Both
+   themes use the same two layers; only the tokens differ. */
+
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 30%, transparent 100%);
+}
+
+#root::after {
+  content: '';
+  position: fixed;
+  inset: -200%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 7s steps(6) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -2%); }
+  80% { transform: translate(3%, 1%); }
+}
+
+/* ── CRT (Blackwire only) ──────────────────────────────────────
+   Static scanlines plus one bright line rolling down the screen,
+   the way a phone camera catches a real CRT. Zero-opacity in
+   DevTheme, so the element costs nothing there. */
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: var(--scanline-opacity);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.22) 0px,
+    rgb(0 0 0 / 0.22) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 140px;
+  pointer-events: none;
+  z-index: 3;
+  opacity: calc(var(--scanline-opacity) * 0.28);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(176 107 255 / 0.14) 45%,
+    rgb(0 229 255 / 0.18) 50%,
+    rgb(176 107 255 / 0.14) 55%,
+    transparent
+  );
+  animation: roll 7s linear infinite;
+}
+
+@keyframes roll {
+  from { top: -140px; }
+  to { top: 100%; }
+}
+
+/* ── Typography ────────────────────────────────────────────────
+   Rajdhani sits smaller on the body than Chakra Petch at the same
+   px, so Blackwire nudges its display type up to keep the optical
+   weight of the two decks matched. */
+
+.stencil {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+:root[data-theme='cyber'] .stencil {
+  letter-spacing: 0.2em;
+  font-size: 1.06em;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-weight: var(--accent-weight);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+:root[data-theme='cyber'] .label {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+}
+
+/* Accent-coloured labels bloom; neutral ones stay flat and readable. */
+:root[data-theme='cyber'] .label:not(.text-ink-faint):not(.text-ink-dim) {
+  text-shadow: var(--label-shadow);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Panels ────────────────────────────────────────────────── */
+
+.deck {
+  background: var(--color-deck);
+  border: 1px solid var(--color-rule);
+}
+
+:root[data-theme='cyber'] .deck {
+  background: linear-gradient(180deg, var(--color-deck) 0%, var(--color-void) 100%);
+}
+
+/* Corner ticks — the detail that reads as instrument, not card. */
+.ticked {
+  position: relative;
+}
+.ticked::before,
+.ticked::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-color: var(--color-rule-hot);
+  border-style: solid;
+  pointer-events: none;
+}
+.ticked::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+.ticked::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+:root[data-theme='cyber'] .ticked::before,
+:root[data-theme='cyber'] .ticked::after {
+  width: 10px;
+  height: 10px;
+  border-color: var(--color-coral);
+  box-shadow: 0 0 10px -1px var(--color-coral);
+}
+
+/* ── Signals ───────────────────────────────────────────────── */
+
+.pulse-live {
+  box-shadow: var(--glow-live);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+.pulse-amber {
+  box-shadow: var(--glow-amber);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+.pulse-coral {
+  box-shadow: var(--glow-coral);
+  animation: breathe 1s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.58; }
+}
+
+/* Sweep of light across an actively running row. */
+.scanning {
+  position: relative;
+  overflow: hidden;
+}
+.scanning::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklab, var(--color-live) 7%, transparent) 48%,
+    color-mix(in oklab, var(--color-live) 16%, transparent) 50%,
+    color-mix(in oklab, var(--color-live) 7%, transparent) 52%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: sweep 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes sweep {
+  to { transform: translateX(100%); }
+}
+
+/* ── Glitch (Blackwire only) ───────────────────────────────────
+   Two offset copies in magenta and cyan, revealed in slivers for a
+   few frames at a time. Long idle gaps keep it a tic, not a strobe. */
+
+.glitch {
+  position: relative;
+}
+
+:root[data-theme='cyber'] .glitch::before,
+:root[data-theme='cyber'] .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  clip-path: inset(100% 0 0 0);
+}
+
+:root[data-theme='cyber'] .glitch::before {
+  color: var(--color-coral);
+  transform: translateX(-2px);
+  animation: glitch-a 5.5s steps(1) infinite;
+}
+
+:root[data-theme='cyber'] .glitch::after {
+  color: var(--color-live);
+  transform: translateX(2px);
+  animation: glitch-b 5.5s steps(1) infinite;
+}
+
+@keyframes glitch-a {
+  0%, 92%, 100% { clip-path: inset(100% 0 0 0); }
+  93% { clip-path: inset(12% 0 62% 0); }
+  95% { clip-path: inset(58% 0 24% 0); }
+  97% { clip-path: inset(32% 0 48% 0); }
+}
+
+@keyframes glitch-b {
+  0%, 92%, 100% { clip-path: inset(100% 0 0 0); }
+  94% { clip-path: inset(70% 0 12% 0); }
+  96% { clip-path: inset(20% 0 66% 0); }
+  98% { clip-path: inset(45% 0 38% 0); }
+}
+
+/* ── Scrollbars ────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-rule);
+  border: 2px solid var(--color-void);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-rule-hot);
+}
+
+/* ── Form controls ─────────────────────────────────────────── */
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+input,
+textarea,
+select {
+  background: var(--color-void);
+  border: 1px solid var(--color-rule);
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-live);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-live) 25%, transparent);
+}
+::placeholder {
+  color: var(--color-ink-faint);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* ── Tree connectors ───────────────────────────────────────── */
+
+.branch {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-rule);
+}
+.branch-elbow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 13px;
+  height: 15px;
+  border-left: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* ── React Flow overrides ──────────────────────────────────── */
+
+.react-flow {
+  background: transparent;
+}
+.react-flow__attribution {
+  display: none;
+}
+.react-flow__edge-path {
+  stroke-width: 1.25;
+}
+:root[data-theme='cyber'] .react-flow__edge-path {
+  stroke-width: 1.6;
+}
+.react-flow__controls {
+  border: 1px solid var(--color-rule);
+  box-shadow: none;
+}
+.react-flow__controls-button {
+  background: var(--color-deck);
+  border-bottom: 1px solid var(--color-rule);
+  fill: var(--color-ink-dim);
+}
+.react-flow__controls-button:hover {
+  background: var(--color-deck-3);
+}
+
+/* Dashed march along an edge whose call is still in flight. */
+.react-flow__edge.in-flight .react-flow__edge-path {
+  stroke-dasharray: 4 4;
+  animation: march 0.55s linear infinite;
+}
+
+@keyframes march {
+  to { stroke-dashoffset: -8; }
+}
+
+/* ── xterm ─────────────────────────────────────────────────── */
+
+.xterm .xterm-viewport {
+  background: transparent !important;
+}
+
+/* ── Motion preference ─────────────────────────────────────────
+   Kills the CRT roll and glitch too — they are the most likely
+   elements on this page to bother someone. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  body::before {
+    display: none;
+  }
+}

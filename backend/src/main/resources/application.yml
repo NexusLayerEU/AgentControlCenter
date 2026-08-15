@@ -1,0 +1,32 @@
+server:
+  port: ${ACC_PORT:4000}
+  address: 127.0.0.1
+
+spring:
+  application:
+    name: acc-daemon
+  datasource:
+    url: jdbc:sqlite:${ACC_HOME:${user.home}/.acc}/acc.db
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 4
+      pool-name: acc-sqlite
+  mvc:
+    async:
+      request-timeout: 120000
+
+logging:
+  level:
+    root: INFO
+    eu.nexuslayer.acc: DEBUG
+    org.springframework.web: WARN
+
+acc:
+  home: ${ACC_HOME:${user.home}/.acc}
+  claude-binary: ${ACC_CLAUDE_BIN:claude}
+  # Seconds the daemon will hold a PreToolUse hook open waiting for a human.
+  # Must stay comfortably under Claude Code's own hook timeout (default 60s).
+  approval-timeout-seconds: 50
+  # What to do with a hook from a session ACC did not launch and knows nothing about.
+  # observe = record it and allow; gate = require approval like any other.
+  unknown-session-policy: observe

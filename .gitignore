@@ -1,0 +1,15 @@
+# Build output
+backend/target/
+frontend/node_modules/
+frontend/dist/
+backend/src/main/resources/static/
+
+# Release artifacts — published as GitHub Release assets, never committed
+release/*.tar.gz
+release/*.zip
+release/.work/
+release/.jre-cache/
+
+# Local
+.DS_Store
+*.log
