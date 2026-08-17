@@ -24,6 +24,23 @@
   never reached it, because it animates in JavaScript — so the staggered reveals
   kept moving for anyone who had asked the system to stop.
 
+### Fixed (a bug-hunt pass)
+
+- **Adopted sessions stayed "active" forever.** Nothing moved them out of IDLE —
+  Claude Code does not report a closed window — so terminals shut two days earlier
+  were still inflating the active count. A janitor now closes adopted sessions
+  after `acc.stale-session-minutes` (default 30) of silence.
+- **Restarting the daemon marked your own sessions FAILED.** Nothing failed; ACC
+  merely stopped watching. Adopted sessions now close as COMPLETED, while
+  dispatched agents — which genuinely die with the daemon — still fail.
+- **Closing the dashboard leaked a shell per terminal opened.** PTYs exist only to
+  feed a browser pane, so they are now reaped when the last client disconnects.
+- **Three unbounded in-memory maps** in a process meant to run for weeks: open
+  tool calls that never received a PostToolUse, one lock per transcript, and
+  per-session sequence counters. All evicted when a session ends.
+- **Deleting a session orphaned its transcript cursor**, so a re-adopted Claude
+  session would resume mid-file instead of from the start.
+
 ### Known limits
 
 - The agent's **thinking** is not recoverable for adopted sessions: Claude Code

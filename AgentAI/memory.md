@@ -159,6 +159,16 @@ the UI looks empty. Use `--virtual-time-budget=10000 --force-prefers-reduced-mot
 together: the first waits for the fetches, the second stops motion components
 being captured mid-fade. Verify with `--dump-dom` before assuming a UI bug.
 
+### Long-lived daemons need an eviction story
+Every `ConcurrentHashMap` keyed by session id is a leak unless something removes
+entries. `SessionJanitor` sweeps on a schedule and is the single place that calls
+`forget()` on EventService, AdoptionService and TranscriptReader. Add a `forget`
+whenever you add per-session state.
+
+### `@Scheduled` silently does nothing without `@EnableScheduling`
+The bean registers, the method never runs, and there is no warning. Always verify a
+scheduled task by observing its effect, never by reading the annotation.
+
 ### The default JDK on this machine is 11
 Spring Boot 3 needs 17+. The `./acc` script resolves 21 via `/usr/libexec/java_home`.
 

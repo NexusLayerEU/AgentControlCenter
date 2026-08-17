@@ -1,5 +1,7 @@
 package eu.nexuslayer.acc.ws;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -19,12 +21,20 @@ import eu.nexuslayer.acc.util.Json;
 @Component
 public class AccWebSocketHandler extends TextWebSocketHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(AccWebSocketHandler.class);
+
     private final SocketHub hub;
     private final PtyRegistry ptyRegistry;
 
     public AccWebSocketHandler(SocketHub hub, PtyRegistry ptyRegistry) {
         this.hub = hub;
         this.ptyRegistry = ptyRegistry;
+        hub.whenLastClientDisconnects(() -> {
+            int closed = ptyRegistry.closeAll();
+            if (closed > 0) {
+                log.info("Closed {} terminal(s): no dashboard left to serve them", closed);
+            }
+        });
     }
 
     @Override

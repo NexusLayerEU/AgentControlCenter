@@ -87,7 +87,31 @@ public class SessionRepository {
     public void delete(String id) {
         jdbc.update("DELETE FROM events WHERE session_id = ?", id);
         jdbc.update("DELETE FROM approvals WHERE session_id = ?", id);
+        // Without this the cursor outlives the session, so a re-adopted Claude
+        // session would resume mid-file instead of from the start.
+        jdbc.update("DELETE FROM transcript_cursors WHERE claude_session_id = "
+                + "(SELECT claude_session_id FROM sessions WHERE id = ?)", id);
         jdbc.update("DELETE FROM sessions WHERE id = ?", id);
+    }
+
+    /**
+     * Adopted sessions still marked live but untouched since {@code cutoff}. The
+     * window they belong to is almost certainly closed — Claude Code does not tell
+     * us when that happens.
+     */
+    public List<AgentSession> findStaleAdopted(long cutoff) {
+        return jdbc.query(
+                "SELECT * FROM sessions WHERE origin = 'hook' "
+                        + "AND status IN ('IDLE','RUNNING','STARTING') AND updated_at < ?",
+                MAPPER, cutoff);
+    }
+
+    /** Finished sessions old enough that nothing more will arrive for them. */
+    public List<AgentSession> findRecentlyFinished(long cutoff) {
+        return jdbc.query(
+                "SELECT * FROM sessions WHERE status IN ('COMPLETED','FAILED','CANCELLED') "
+                        + "AND updated_at < ? AND updated_at > ?",
+                MAPPER, cutoff, cutoff - 3_600_000);
     }
 
     /**
@@ -95,9 +119,18 @@ public class SessionRepository {
      * attached to those processes any more, so mark them failed on boot.
      */
     public int markOrphansFailed() {
-        return jdbc.update("""
-                UPDATE sessions SET status = 'FAILED', ended_at = ?, updated_at = ?
-                WHERE status IN ('STARTING','RUNNING','WAITING_APPROVAL')
-                """, System.currentTimeMillis(), System.currentTimeMillis());
+        long now = System.currentTimeMillis();
+        // A dispatched agent really did die with the daemon — that is a failure.
+        int failed = jdbc.update(
+                "UPDATE sessions SET status = 'FAILED', ended_at = ?, updated_at = ? "
+                        + "WHERE origin <> 'hook' AND status IN ('STARTING','RUNNING','WAITING_APPROVAL')",
+                now, now);
+        // An adopted session is somebody's terminal. ACC merely stopped watching
+        // it; calling that FAILED blames the user's window for our restart.
+        int closed = jdbc.update(
+                "UPDATE sessions SET status = 'COMPLETED', ended_at = ?, updated_at = ? "
+                        + "WHERE origin = 'hook' AND status IN ('STARTING','RUNNING','WAITING_APPROVAL','IDLE')",
+                now, now);
+        return failed + closed;
     }
 }

@@ -211,6 +211,20 @@ public class AdoptionService {
         });
     }
 
+    /**
+     * Drops the open-call bookkeeping for a session.
+     *
+     * <p>Entries are normally removed by PostToolUse, but a denied tool or a window
+     * closed mid-call never sends one — so without this they accumulate for the
+     * life of the daemon, each holding an event and its payload.
+     */
+    public void forget(String claudeSessionId) {
+        if (claudeSessionId == null) {
+            return;
+        }
+        openCalls.keySet().removeIf(k -> k.startsWith(claudeSessionId + '/'));
+    }
+
     private String key(String claudeSessionId, String useId) {
         return claudeSessionId + '/' + useId;
     }

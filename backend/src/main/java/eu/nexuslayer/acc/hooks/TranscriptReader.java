@@ -275,6 +275,16 @@ public class TranscriptReader {
         return 1;
     }
 
+    /**
+     * Releases the per-session lock. One is created per Claude session and would
+     * otherwise live as long as the daemon.
+     */
+    public void forget(String claudeSessionId) {
+        if (claudeSessionId != null) {
+            locks.remove(claudeSessionId);
+        }
+    }
+
     private long cursor(String claudeSessionId) {
         Long offset = jdbc.queryForObject(
                 "SELECT COALESCE((SELECT byte_offset FROM transcript_cursors "

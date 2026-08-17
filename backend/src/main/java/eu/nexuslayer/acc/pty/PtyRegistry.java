@@ -114,6 +114,20 @@ public class PtyRegistry {
         }
     }
 
+    /**
+     * Closes every terminal.
+     *
+     * <p>A PTY exists only to feed a browser pane. If the last dashboard goes away
+     * the shells behind those panes have nobody to talk to, and nothing would ever
+     * reap them — closing the tab used to leave a live shell per terminal opened,
+     * for the lifetime of the daemon.
+     */
+    public int closeAll() {
+        int n = terminals.size();
+        terminals.keySet().forEach(this::close);
+        return n;
+    }
+
     public boolean isOpen(String terminalId) {
         PtyProcess process = terminals.get(terminalId);
         return process != null && process.isAlive();

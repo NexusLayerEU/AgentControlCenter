@@ -27,6 +27,7 @@ public class SocketHub implements Broadcaster {
     private static final Logger log = LoggerFactory.getLogger(SocketHub.class);
 
     private final Set<WebSocketSession> clients = ConcurrentHashMap.newKeySet();
+    private final Set<Runnable> onLastClientGone = ConcurrentHashMap.newKeySet();
 
     public void register(WebSocketSession session) {
         clients.add(session);
@@ -36,6 +37,14 @@ public class SocketHub implements Broadcaster {
 
     public void unregister(WebSocketSession session) {
         clients.remove(session);
+        if (clients.isEmpty()) {
+            onLastClientGone.forEach(Runnable::run);
+        }
+    }
+
+    /** Registered by anything holding resources that only serve a live dashboard. */
+    public void whenLastClientDisconnects(Runnable action) {
+        onLastClientGone.add(action);
     }
 
     @Override
