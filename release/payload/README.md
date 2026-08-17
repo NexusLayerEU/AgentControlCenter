@@ -1,4 +1,4 @@
-# Agent Control Center 0.2.0
+# Agent Control Center 0.3.0
 
 A local daemon and dashboard for watching, understanding and gating headless
 Claude Code agents.
@@ -12,16 +12,16 @@ an approval gate that can hold a tool call until you say yes. Two themes.
 **macOS / Linux**
 
 ```bash
-tar -xzf acc-0.2.0-<platform>.tar.gz
-cd acc-0.2.0
+tar -xzf acc-0.3.0-<platform>.tar.gz
+cd acc-0.3.0
 ./install.sh
 ```
 
 **Windows** (PowerShell or cmd, no admin needed)
 
 ```
-Expand-Archive acc-0.2.0-windows-x64.zip
-cd acc-0.2.0
+Expand-Archive acc-0.3.0-windows-x64.zip
+cd acc-0.3.0
 .\install.bat
 ```
 

@@ -34,6 +34,9 @@
 - Conversation capture: adopted sessions now record prompts, replies and token
   usage from the Claude Code transcript, ordered chronologically.
 
+- v0.3.0 released: conversation capture, filter switches, SessionEnd lifecycle,
+  the daemon bug-hunt fixes, and the pty4j/purejavacomm terminal fix.
+
 ## In Progress
 - Nothing.
 

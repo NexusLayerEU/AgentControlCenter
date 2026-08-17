@@ -115,7 +115,7 @@ goto :usage
   exit /b 0
 
 :version
-  echo Agent Control Center 0.2.0
+  echo Agent Control Center 0.3.0
   "%JAVA%" -version
   exit /b 0
 

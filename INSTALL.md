@@ -13,12 +13,12 @@ From the [Releases page](https://github.com/NexusLayerEU/AgentControlCenter/rele
 
 | You are on | Download | Java needed |
 |---|---|---|
-| macOS, Apple Silicon (M1–M4) | `acc-0.2.0-macos-aarch64.tar.gz` | no |
-| macOS, Intel | `acc-0.2.0-macos-x64.tar.gz` | no |
-| Linux, x86-64 | `acc-0.2.0-linux-x64.tar.gz` | no |
-| Linux, ARM64 | `acc-0.2.0-linux-aarch64.tar.gz` | no |
-| Windows 10/11, x86-64 | `acc-0.2.0-windows-x64.zip` | no |
-| Anything else | `acc-0.2.0-universal.zip` | **JDK 17+** |
+| macOS, Apple Silicon (M1–M4) | `acc-0.3.0-macos-aarch64.tar.gz` | no |
+| macOS, Intel | `acc-0.3.0-macos-x64.tar.gz` | no |
+| Linux, x86-64 | `acc-0.3.0-linux-x64.tar.gz` | no |
+| Linux, ARM64 | `acc-0.3.0-linux-aarch64.tar.gz` | no |
+| Windows 10/11, x86-64 | `acc-0.3.0-windows-x64.zip` | no |
+| Anything else | `acc-0.3.0-universal.zip` | **JDK 17+** |
 
 Not sure which Mac you have? `uname -m` → `arm64` is Apple Silicon, `x86_64` is
 Intel.
@@ -36,8 +36,8 @@ shasum -a 256 -c checksums.txt --ignore-missing
 ### macOS / Linux
 
 ```bash
-tar -xzf acc-0.2.0-macos-aarch64.tar.gz
-cd acc-0.2.0
+tar -xzf acc-0.3.0-macos-aarch64.tar.gz
+cd acc-0.3.0
 ./install.sh
 ```
 
@@ -68,8 +68,8 @@ export PATH="$HOME/.local/bin:$PATH"
 No admin rights required.
 
 ```powershell
-Expand-Archive acc-0.2.0-windows-x64.zip -DestinationPath .
-cd acc-0.2.0
+Expand-Archive acc-0.3.0-windows-x64.zip -DestinationPath .
+cd acc-0.3.0
 .\install.bat
 ```
 

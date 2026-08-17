@@ -10,7 +10,7 @@
 # Usage:  ./release/build-release.sh [--skip-build] [--no-runtimes]
 set -euo pipefail
 
-VERSION="0.2.0"
+VERSION="0.3.0"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$ROOT/release"
 WORK="$OUT/.work"

@@ -43,7 +43,19 @@ class HookInstallerTest {
         assertTrue(hooks.has("PreToolUse"));
         assertTrue(hooks.has("PostToolUse"));
         assertTrue(hooks.has("Stop"));
-        assertEquals(5, result.installed().size());
+        assertEquals(6, result.installed().size());
+    }
+
+    @Test
+    @DisplayName("SessionEnd is registered — it is how an adopted session knows it closed")
+    void registersSessionEnd(@TempDir Path projectDir) throws Exception {
+        installer.install(4000, true, projectDir.toString());
+        JsonNode hooks = settingsAt(projectDir).path("hooks");
+
+        assertTrue(hooks.has("SessionEnd"),
+                "without it, a session can only be aged out on a guess");
+        assertTrue(hooks.path("SessionEnd").get(0).path("hooks").get(0)
+                .path("command").asText().contains("session-end"));
     }
 
     @Test

@@ -12,7 +12,7 @@ tool call, diff and result — as a live tree you can actually read, with a gate
 that can stop a dangerous command *before* it runs.
 
 [![License](https://img.shields.io/badge/license-MIT-c6f24e?style=flat-square)](LICENSE)
-[![Release](https://img.shields.io/badge/release-v0.2.0-5ac8f2?style=flat-square)](https://github.com/NexusLayerEU/AgentControlCenter/releases)
+[![Release](https://img.shields.io/badge/release-v0.3.0-5ac8f2?style=flat-square)](https://github.com/NexusLayerEU/AgentControlCenter/releases)
 [![Java](https://img.shields.io/badge/java-21-f2a93b?style=flat-square)](https://adoptium.net)
 [![Platforms](https://img.shields.io/badge/macOS%20·%20Linux%20·%20Windows-ff5c4d?style=flat-square)](INSTALL.md)
 [![Runtime bundled](https://img.shields.io/badge/java-not%20required-a78bfa?style=flat-square)](INSTALL.md)
@@ -93,7 +93,7 @@ scanlines and neon. Switch from the top bar; the choice sticks.
 
 ```bash
 # 1. Grab the bundle for your platform from Releases — no Java required
-tar -xzf acc-0.2.0-macos-aarch64.tar.gz && cd acc-0.2.0
+tar -xzf acc-0.3.0-macos-aarch64.tar.gz && cd acc-0.3.0
 
 # 2. Install (user-level, no sudo)
 ./install.sh

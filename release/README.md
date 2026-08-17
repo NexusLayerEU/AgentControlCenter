@@ -1,4 +1,4 @@
-# ACC 0.2.0 — Release artifacts
+# ACC 0.3.0 — Release artifacts
 
 Self-contained packages for Agent Control Center. Each platform bundle ships a
 **Temurin JRE 21** in `runtime/`, so the target machine needs no Java installed —
@@ -8,12 +8,12 @@ only [Claude Code](https://claude.com/claude-code) on its PATH.
 
 | Package | For | Java needed |
 |---|---|---|
-| `acc-0.2.0-macos-aarch64.tar.gz` | macOS, Apple Silicon (M1–M4) | no |
-| `acc-0.2.0-macos-x64.tar.gz` | macOS, Intel | no |
-| `acc-0.2.0-linux-x64.tar.gz` | Linux, x86-64 | no |
-| `acc-0.2.0-linux-aarch64.tar.gz` | Linux, ARM64 | no |
-| `acc-0.2.0-windows-x64.zip` | Windows 10/11, x86-64 | no |
-| `acc-0.2.0-universal.zip` | any other OS/arch | **JDK 17+** |
+| `acc-0.3.0-macos-aarch64.tar.gz` | macOS, Apple Silicon (M1–M4) | no |
+| `acc-0.3.0-macos-x64.tar.gz` | macOS, Intel | no |
+| `acc-0.3.0-linux-x64.tar.gz` | Linux, x86-64 | no |
+| `acc-0.3.0-linux-aarch64.tar.gz` | Linux, ARM64 | no |
+| `acc-0.3.0-windows-x64.zip` | Windows 10/11, x86-64 | no |
+| `acc-0.3.0-universal.zip` | any other OS/arch | **JDK 17+** |
 
 Verify a download against `checksums.txt`:
 
@@ -26,8 +26,8 @@ shasum -a 256 -c checksums.txt --ignore-missing
 **macOS / Linux**
 
 ```bash
-tar -xzf acc-0.2.0-macos-aarch64.tar.gz
-cd acc-0.2.0
+tar -xzf acc-0.3.0-macos-aarch64.tar.gz
+cd acc-0.3.0
 ./install.sh                     # → ~/.acc/app, links ~/.local/bin/acc
 ```
 
@@ -37,8 +37,8 @@ needs sudo).
 **Windows** — no admin rights required:
 
 ```
-Expand-Archive acc-0.2.0-windows-x64.zip -DestinationPath .
-cd acc-0.2.0
+Expand-Archive acc-0.3.0-windows-x64.zip -DestinationPath .
+cd acc-0.3.0
 .\install.bat                    # → %LOCALAPPDATA%\ACC, adds it to your PATH
 ```
 
@@ -78,8 +78,10 @@ packaged asset count does not match what Vite just produced.
 
 ## What's new
 
-See [CHANGELOG.md](CHANGELOG.md). 0.2.0 adds the overview dashboard, two themes,
-working Windows support, and a fix for the approval gate asking twice.
+See [CHANGELOG.md](CHANGELOG.md). 0.3.0 records the **conversation** — your
+prompts and the model's replies, not just tool calls — adds **filter switches**
+above the timeline, keeps adopted sessions open until you actually close the
+terminal, and **fixes the terminal**, which never worked in 0.1.0 or 0.2.0.
 
 ## What was verified, and what was not
 
@@ -97,6 +99,9 @@ Built and tested on macOS (Apple Silicon):
   for that architecture (Mach-O arm64 / x86_64, ELF x86-64 / aarch64, PE32+).
 - **69 backend tests** pass, including the approval gate under real concurrent
   waits.
+- The **terminal**: a PTY opens, a real shell runs in the session's directory, and
+  a keystroke sent over the websocket comes back as `pty:data`. This is the check
+  that was missing when 0.2.0 shipped a terminal that could never open.
 
 Not executed here, because this is a macOS machine:
 

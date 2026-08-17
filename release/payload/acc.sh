@@ -114,7 +114,7 @@ print(f"watch it at {base}")
 PY
     ;;
   logs) tail -f "$LOG" ;;
-  version) info "Agent Control Center 0.2.0"; "$JAVA" -version 2>&1 | head -1 ;;
+  version) info "Agent Control Center 0.3.0"; "$JAVA" -version 2>&1 | head -1 ;;
   *)
     cat <<EOF
 Agent Control Center
