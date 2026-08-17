@@ -39,6 +39,9 @@ public class HookInstaller {
             "PostToolUse", "post-tool-use",
             "Stop", "stop",
             "SessionStart", "session-start",
+            // The only reliable "your window closed" signal. Without it an
+            // adopted session can only be aged out on a guess.
+            "SessionEnd", "session-end",
             "Notification", "notification");
 
     /** Only PreToolUse can block, so only it needs a long timeout. */

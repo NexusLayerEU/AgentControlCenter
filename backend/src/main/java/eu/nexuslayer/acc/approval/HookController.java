@@ -75,6 +75,17 @@ public class HookController {
         return ResponseEntity.ok(Map.of("continue", true));
     }
 
+    /**
+     * Fired when the Claude Code session actually ends — the window closed, the
+     * conversation was cleared, or the process exited. This is what lets an
+     * adopted session stay open for as long as you keep the terminal open.
+     */
+    @PostMapping("/session-end")
+    public ResponseEntity<Map<String, Object>> sessionEnd(@RequestBody JsonNode body) {
+        adoption.markEnded(body);
+        return ResponseEntity.ok(Map.of("continue", true));
+    }
+
     @PostMapping("/notification")
     public ResponseEntity<Map<String, Object>> notification(@RequestBody JsonNode body) {
         adoption.adopt(body);

@@ -21,11 +21,10 @@ import eu.nexuslayer.acc.ws.Broadcaster;
 /**
  * Closes the books on sessions nobody is driving any more.
  *
- * <p>An adopted session goes IDLE when a turn ends, and nothing ever moves it on:
- * Claude Code does not tell us when you close the window. Left alone, every
- * terminal you have ever opened stays "active" forever and the dashboard's active
- * count becomes meaningless — observed at four sessions still listed as live two
- * days after their windows were shut.
+ * <p>A SessionEnd hook closes an adopted session the moment the terminal is closed,
+ * so this is a backstop rather than the main mechanism: it catches the sessions
+ * whose window died without warning — kill -9, a crash, a reboot — which would
+ * otherwise sit in the active list forever.
  *
  * <p>This also evicts the per-session state the daemon keeps in memory. It is a
  * long-running background process; anything keyed by session id and never removed
@@ -46,7 +45,7 @@ public class SessionJanitor {
 
     public SessionJanitor(SessionRepository sessions, EventService events, AdoptionService adoption,
             TranscriptReader transcripts, Broadcaster broadcaster, JdbcTemplate jdbc,
-            @Value("${acc.stale-session-minutes:30}") long staleMinutes) {
+            @Value("${acc.stale-session-minutes:1440}") long staleMinutes) {
         this.sessions = sessions;
         this.events = events;
         this.adoption = adoption;

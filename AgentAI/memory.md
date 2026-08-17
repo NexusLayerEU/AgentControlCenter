@@ -159,6 +159,12 @@ the UI looks empty. Use `--virtual-time-budget=10000 --force-prefers-reduced-mot
 together: the first waits for the fetches, the second stops motion components
 being captured mid-fade. Verify with `--dump-dom` before assuming a UI bug.
 
+### SessionEnd is the real "window closed" signal
+Verified empirically: Claude Code fires `SessionEnd` with a `reason` field when a
+session ends (headless gives `reason=other`). Register it rather than inferring a
+closed terminal from inactivity — a timeout either kills live sessions or keeps
+dead ones. The stale sweep stays as a 24h backstop for kill -9 / crash / reboot.
+
 ### Long-lived daemons need an eviction story
 Every `ConcurrentHashMap` keyed by session id is a leak unless something removes
 entries. `SessionJanitor` sweeps on a schedule and is the single place that calls

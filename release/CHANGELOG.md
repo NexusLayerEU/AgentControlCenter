@@ -26,10 +26,15 @@
 
 ### Fixed (a bug-hunt pass)
 
-- **Adopted sessions stayed "active" forever.** Nothing moved them out of IDLE —
-  Claude Code does not report a closed window — so terminals shut two days earlier
-  were still inflating the active count. A janitor now closes adopted sessions
-  after `acc.stale-session-minutes` (default 30) of silence.
+- **Adopted sessions stayed "active" forever.** Nothing moved them out of IDLE, so
+  terminals shut two days earlier were still inflating the active count. ACC now
+  registers Claude Code's **`SessionEnd`** hook, which fires the moment a session
+  really ends — so a session stays live for exactly as long as you keep the
+  terminal open, and closes the instant you exit. `acc.stale-session-minutes`
+  (default 1440 = 24h) remains only as a backstop for windows that die without
+  warning: kill -9, a crash, a reboot.
+
+  **Existing installs must re-run `acc attach`** to pick up the new hook.
 - **Restarting the daemon marked your own sessions FAILED.** Nothing failed; ACC
   merely stopped watching. Adopted sessions now close as COMPLETED, while
   dispatched agents — which genuinely die with the daemon — still fail.

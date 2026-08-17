@@ -141,7 +141,14 @@ acc detach              # undo
 session start.
 
 Your sessions then appear in the rail, live, with their tool calls and results.
-They show `IDLE` between turns because your window is still open.
+They show `IDLE` between turns and stay that way for as long as the terminal is
+open — ACC registers Claude Code's `SessionEnd` hook, so a session closes the
+moment you exit and not a second before. Leave a window idle over lunch and it is
+still there when you come back.
+
+If a window dies without warning (kill -9, a crash, a reboot) that hook never
+arrives, so a backstop closes anything untouched for 24 hours
+(`acc.stale-session-minutes`).
 
 ### What attaching actually changes
 

@@ -225,6 +225,36 @@ public class AdoptionService {
         openCalls.keySet().removeIf(k -> k.startsWith(claudeSessionId + '/'));
     }
 
+    /**
+     * The window actually closed (or the conversation was cleared, or the process
+     * exited). This is the signal that lets an adopted session stay live for as
+     * long as the terminal is open, instead of being aged out on a guess.
+     */
+    public void markEnded(JsonNode body) {
+        adopt(body).ifPresent(session -> {
+            if (!"hook".equals(session.origin())) {
+                return;
+            }
+            // Last chance to pick up the closing reply before the file goes quiet.
+            transcripts.ingest(session.id(), session.claudeSessionId(),
+                    Json.text(body, "transcript_path"));
+
+            String reason = Json.text(body, "reason");
+            events.record(session.id(), EventType.SESSION_END,
+                    "Claude Code session ended" + (reason == null ? "" : " (" + reason + ")"),
+                    Json.write(Map.of("reason", reason == null ? "unknown" : reason)));
+
+            sessionService.mutate(session.id(), s -> s.completed(SessionStatus.COMPLETED, null,
+                    s.resultText(), s.totalCostUsd(), s.numTurns(),
+                    System.currentTimeMillis() - s.createdAt()));
+
+            forget(session.claudeSessionId());
+            transcripts.forget(session.claudeSessionId());
+            events.forget(session.id());
+            log.info("Adopted session '{}' ended ({})", session.name(), reason);
+        });
+    }
+
     private String key(String claudeSessionId, String useId) {
         return claudeSessionId + '/' + useId;
     }
