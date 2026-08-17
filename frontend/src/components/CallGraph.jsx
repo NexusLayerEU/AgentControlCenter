@@ -11,7 +11,7 @@ import {
 } from '@xyflow/react'
 
 import { useStore } from '../lib/store'
-import { useTimeline } from '../lib/useTimeline'
+import { useTimeline, useVisibleTimeline } from '../lib/useTimeline'
 import { duration, parsePayload } from '../lib/format'
 import { RISK_TONE, iconFor, styleFor } from '../lib/glyphs'
 import { usePalette } from '../lib/tones'
@@ -34,7 +34,8 @@ export default function CallGraph() {
 }
 
 function GraphCanvas() {
-  const events = useTimeline()
+  const events = useVisibleTimeline()
+  const allEvents = useTimeline()
   const setInspect = useStore((s) => s.setInspect)
   const { tones, surfaces } = usePalette()
 
@@ -43,7 +44,9 @@ function GraphCanvas() {
   if (nodes.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="label">no calls to plot yet</p>
+        <p className="label">
+          {allEvents.length > 0 ? 'everything is filtered out' : 'no calls to plot yet'}
+        </p>
       </div>
     )
   }

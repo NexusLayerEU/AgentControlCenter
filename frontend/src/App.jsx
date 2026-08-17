@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, MotionConfig } from 'framer-motion'
 
 import { useStore } from './lib/store'
 import { connectSocket } from './lib/socket'
@@ -44,6 +44,11 @@ export default function App() {
   }, [setComposerOpen])
 
   return (
+    // framer-motion animates via JS, so the CSS prefers-reduced-motion query
+    // never reached it. reducedMotion="user" makes every motion component honour
+    // the OS setting — without it the staggered reveals keep moving for someone
+    // who asked the system not to.
+    <MotionConfig reducedMotion="user">
     <div className="relative z-10 flex h-full flex-col">
       {/* Theme-owned atmosphere layer; inert in DevTheme. */}
       <div className="atmosphere" aria-hidden="true" />
@@ -81,5 +86,6 @@ export default function App() {
       <AnimatePresence>{composerOpen && <Composer key="composer" />}</AnimatePresence>
       <Toast />
     </div>
+    </MotionConfig>
   )
 }

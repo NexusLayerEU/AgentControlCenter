@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 
 import { useStore } from '../lib/store'
-import { useTimeline } from '../lib/useTimeline'
+import { useTimeline, useVisibleTimeline } from '../lib/useTimeline'
 import { clock, duration, parsePayload, relativise } from '../lib/format'
 import { RISK_TONE, TONE_BORDER, TONE_TEXT, iconFor, styleFor } from '../lib/glyphs'
 
@@ -13,7 +13,9 @@ import { RISK_TONE, TONE_BORDER, TONE_TEXT, iconFor, styleFor } from '../lib/gly
  */
 export default function FlowTree() {
   const selectedId = useStore((s) => s.selectedId)
-  const events = useTimeline()
+  const events = useVisibleTimeline()
+  const allEvents = useTimeline()
+  const resetFilters = useStore((s) => s.resetFilters)
   const inspectId = useStore((s) => s.inspectId)
   const setInspect = useStore((s) => s.setInspect)
   const cwd = useStore((s) => s.sessions.find((x) => x.id === s.selectedId)?.cwd)
@@ -41,11 +43,22 @@ export default function FlowTree() {
   }, [events.length])
 
   if (events.length === 0) {
+    // Distinguish "nothing has happened" from "you filtered it all away" —
+    // otherwise an over-filtered session reads as a broken one.
+    const filteredAway = allEvents.length > 0
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <div className="mx-auto mb-3 h-8 w-px bg-gradient-to-b from-transparent via-live to-transparent" />
-          <p className="label">awaiting first signal</p>
+          <p className="label">{filteredAway ? 'everything is filtered out' : 'awaiting first signal'}</p>
+          {filteredAway && (
+            <button
+              onClick={resetFilters}
+              className="mt-3 border border-amber/40 bg-amber/10 px-3 py-1 text-[11px] text-amber transition-colors hover:bg-amber/20"
+            >
+              show all {allEvents.length} events
+            </button>
+          )}
         </div>
       </div>
     )

@@ -148,6 +148,17 @@ reflect insertion order, so ordering by seq put the model's "I'll read the file"
 after the read. `findBySession` orders by `ts, seq`, and the frontend store sorts
 the same way.
 
+### framer-motion ignores the CSS reduced-motion query
+It animates via JS, so `@media (prefers-reduced-motion: reduce)` never applied.
+`<MotionConfig reducedMotion="user">` in App.jsx makes every motion component
+respect the OS setting. This also makes headless screenshots deterministic.
+
+### Screenshotting the dashboard reliably
+`--headless=new --screenshot` fires on load, before React has fetched anything, so
+the UI looks empty. Use `--virtual-time-budget=10000 --force-prefers-reduced-motion`
+together: the first waits for the fetches, the second stops motion components
+being captured mid-fade. Verify with `--dump-dom` before assuming a UI bug.
+
 ### The default JDK on this machine is 11
 Spring Boot 3 needs 17+. The `./acc` script resolves 21 via `/usr/libexec/java_home`.
 

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { api } from './api'
 import { readRoute, writeRoute } from './route'
 import { applyTheme, readStoredTheme } from './theme'
+import { defaultFilters, persistFilters, readStoredFilters } from './filters'
 
 /** Shared stable reference for "this session has no events yet". */
 export const EMPTY_EVENTS = Object.freeze([])
@@ -26,6 +27,7 @@ export const useStore = create((set, get) => ({
   view: readRoute().view,
   page: readRoute().page,
   theme: readStoredTheme(),
+  filters: readStoredFilters(),
   inspectId: null,
   composerOpen: false,
   toast: null,
@@ -54,6 +56,21 @@ export const useStore = create((set, get) => ({
   },
   setInspect: (inspectId) => set({ inspectId }),
   setTheme: (theme) => set({ theme: applyTheme(theme) }),
+
+  toggleFilter: (key) =>
+    set((state) => {
+      const filters = { ...state.filters, [key]: !state.filters[key] }
+      persistFilters(filters)
+      return { filters }
+    }),
+
+  /** Turn everything back on — the escape hatch when a view looks empty. */
+  resetFilters: () =>
+    set(() => {
+      const filters = defaultFilters()
+      persistFilters(filters)
+      return { filters }
+    }),
   setComposerOpen: (composerOpen) => set({ composerOpen }),
 
   notify: (message, tone = 'info') => {

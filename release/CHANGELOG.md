@@ -8,6 +8,9 @@
   the model's replies, read from Claude Code's transcript, with the model name and
   per-message token usage (input, output, cache read/write). Previously an adopted
   session showed tool calls with no idea what was asked or answered.
+- **Filter toggles above the timeline** — prompts, replies, thinking, tools, gate
+  and system, each with a count, persisted between sessions. Errors are never
+  filtered out. Both the tree and the graph respect them.
 - `acc.capture-transcript` (default `true`) and `acc.transcript-text-limit` to
   control or disable it — transcripts contain your full conversation.
 
@@ -16,6 +19,10 @@
 - **Events are ordered by when they happened**, not when ACC read them. Transcript
   records arrive after the tool calls they preceded, so the tree used to show the
   model's "I'll read the file" *after* the read.
+
+- **framer-motion now honours `prefers-reduced-motion`.** The CSS media query
+  never reached it, because it animates in JavaScript — so the staggered reveals
+  kept moving for anyone who had asked the system to stop.
 
 ### Known limits
 
