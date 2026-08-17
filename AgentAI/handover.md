@@ -24,8 +24,14 @@ and verified working against Claude Code 2.1.232.
 ## What To Do Next
 
 1. `./acc build && ./acc start`, open http://127.0.0.1:4000.
-2. `./acc attach` to register hooks globally (only project scope has been tested).
-3. Pick from "Known gaps" in `state.md`.
+2. `./acc attach` — required after upgrading, to pick up the SessionEnd hook.
+3. Highest-value work, in order:
+   - **Tests for the lifecycle**: TranscriptReader, AdoptionService, SessionJanitor
+     are all verified by observation only. Today's eight fixes have nothing
+     guarding them against regression.
+   - **Run the Windows and Linux bundles on their own OS.** Both are structurally
+     verified and have never been executed there.
+   - JVM tuning: ~150 MB resident is more than this daemon needs.
 
 ## Key Files & Directories
 
