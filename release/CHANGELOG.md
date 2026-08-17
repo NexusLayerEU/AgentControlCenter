@@ -8,9 +8,13 @@
   the model's replies, read from Claude Code's transcript, with the model name and
   per-message token usage (input, output, cache read/write). Previously an adopted
   session showed tool calls with no idea what was asked or answered.
-- **Filter toggles above the timeline** — prompts, replies, thinking, tools, gate
-  and system, each with a count, persisted between sessions. Errors are never
-  filtered out. Both the tree and the graph respect them.
+- **Filter switches above the timeline** — prompts, replies, thinking, tools, gate
+  and system, each a two-position slider with a count, persisted between sessions
+  and linkable with `?filters=tools,prompts`. Errors are never filtered out. Both
+  the tree and the graph respect them. State and identity are separate channels:
+  the track is one accent so on/off is unmistakable, and a small square carries
+  the category — tinting the track by category made switches for the neutral
+  categories look off while they were on.
 - `acc.capture-transcript` (default `true`) and `acc.transcript-text-limit` to
   control or disable it — transcripts contain your full conversation.
 

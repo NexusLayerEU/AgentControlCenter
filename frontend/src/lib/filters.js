@@ -8,8 +8,8 @@
  * ERROR is deliberately in no group: a failure is never hidden by a filter.
  */
 export const FILTERS = [
-  { key: 'prompts', label: 'prompts', tone: 'ink', types: ['USER_PROMPT'] },
-  { key: 'replies', label: 'replies', tone: 'ink-dim', types: ['ASSISTANT_TEXT'] },
+  { key: 'prompts', label: 'prompts', tone: 'live', types: ['USER_PROMPT'] },
+  { key: 'replies', label: 'replies', tone: 'ink', types: ['ASSISTANT_TEXT'] },
   { key: 'thinking', label: 'thinking', tone: 'violet', types: ['THINKING'] },
   { key: 'tools', label: 'tools', tone: 'cyan', types: ['TOOL_CALL', 'TOOL_RESULT'] },
   {
@@ -21,7 +21,7 @@ export const FILTERS = [
   {
     key: 'system',
     label: 'system',
-    tone: 'ink-faint',
+    tone: 'ink-dim',
     types: ['SESSION_START', 'SESSION_END', 'HOOK', 'SYSTEM'],
   },
 ]
@@ -39,6 +39,19 @@ export function defaultFilters() {
 }
 
 export function readStoredFilters() {
+  // ?filters=tools,prompts turns on exactly those and nothing else, so a
+  // filtered view can be linked or screenshotted without touching local state.
+  try {
+    const requested = new URLSearchParams(location.search).get('filters')
+    if (requested !== null) {
+      const wanted = new Set(requested.split(',').map((s) => s.trim()).filter(Boolean))
+      const picked = Object.fromEntries(FILTERS.map((f) => [f.key, wanted.has(f.key)]))
+      persistFilters(picked)
+      return picked
+    }
+  } catch {
+    // Malformed URL — fall through to the stored preference.
+  }
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
     // Merge rather than replace, so a filter added in a later version defaults

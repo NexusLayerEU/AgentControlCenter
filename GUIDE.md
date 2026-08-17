@@ -35,11 +35,17 @@ Pick a session from the left rail. Three views of it:
 | **GRAPH** | The same run spatially — turns, tools, results, with in-flight edges. |
 | **TERM** | A real terminal in that session's working directory. |
 
-Above the timeline is a row of **show** toggles — prompts, replies, thinking,
-tools, gate, system — each with a count. Turn off what you do not care about; a
+Above the timeline is a row of **show** switches — prompts, replies, thinking,
+tools, gate, system — each with a count. Flip off what you do not care about; a
 long session is much easier to read with `tools` alone, or with everything but
-`system`. The choice persists, and an amber **N hidden** chip appears so a
+`system`.
+
+The switch itself is always the same colour so on and off are unmistakable at a
+glance; the small square beside each label tells you which category it controls.
+The choice persists between sessions, and an amber **N hidden** chip appears so a
 filtered view never looks like an empty one. Errors are never hidden.
+
+A filtered view is linkable too: `?filters=tools,prompts` turns on exactly those.
 
 Click any node to open the inspector. For `Edit` and `Write` you get a
 **side-by-side diff**; for everything else, the exact input and raw output.

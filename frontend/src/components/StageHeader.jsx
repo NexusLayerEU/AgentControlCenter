@@ -94,19 +94,12 @@ export default function StageHeader() {
       </div>
 
       <div className="flex items-end justify-between gap-6 px-5 pb-0">
-        <div className="flex min-w-0 flex-wrap items-end gap-x-5 gap-y-2 pb-2.5">
+        <div className="flex gap-5 pb-2.5">
           <Stat label="mode" value={session.permissionMode} />
           <Stat label="tools" value={toolCalls} />
           <Stat label="turns" value={session.numTurns ?? '—'} />
           <Stat label="elapsed" value={duration(session.durationMs)} />
           <Stat label="cost" value={cost(session.totalCostUsd)} />
-
-          {/* Filters belong with the views they act on, and mean nothing in TERM. */}
-          {view !== 'term' && (
-            <div className="ml-2 self-center">
-              <FilterBar events={events} />
-            </div>
-          )}
         </div>
 
         {/* View switcher sits on the rule, tab-style */}
@@ -128,6 +121,14 @@ export default function StageHeader() {
           ))}
         </div>
       </div>
+
+      {/* Its own row, sitting on the timeline it filters. The stats line was too
+          crowded for six switches, and they mean nothing in the terminal view. */}
+      {view !== 'term' && (
+        <div className="border-t border-rule px-5 py-2">
+          <FilterBar events={events} />
+        </div>
+      )}
     </div>
   )
 }
