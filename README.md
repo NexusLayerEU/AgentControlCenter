@@ -145,9 +145,10 @@ flowchart LR
 **Sessions ACC dispatches** run with `--output-format stream-json`, so it sees
 everything: the agent's prose, its thinking, every tool call and every result.
 
-**Sessions you run yourself** are picked up through Claude Code's hooks. ACC pairs
-`PreToolUse` and `PostToolUse` by `tool_use_id` into the same tree — everything
-except the assistant's prose, which hooks do not carry.
+**Sessions you run yourself** are picked up through Claude Code's hooks, which
+give the tool activity. ACC then reads the conversation — your prompts, the
+model's replies and its token usage — out of Claude Code's own transcript, so an
+adopted session shows the same tree, not just a list of commands.
 
 ### Decisions worth knowing
 

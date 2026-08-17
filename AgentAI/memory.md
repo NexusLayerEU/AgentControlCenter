@@ -127,6 +127,27 @@ Running `mvn test` then restarting the daemon from `target/*.jar` silently runs 
 PREVIOUS build. Use `clean package` before restarting, or you will debug code that
 is not running.
 
+### Claude Code transcripts are the only source of the conversation
+Hooks carry tool activity only. `transcript_path` in every hook payload points at
+a JSONL with `user` (prompts) and `assistant` (text + usage) records — that is how
+adopted sessions get prompts and replies. Skip the tool_use/tool_result blocks in
+there; the hooks already have them with better timing.
+
+Two hard limits, both verified: **thinking blocks are written with empty content**
+(signature only), so agent reasoning is unrecoverable for adopted sessions; and the
+literal API request is not exposed anywhere.
+
+### Stop fires before the final assistant message is flushed
+A transcript read triggered by the Stop hook always stops exactly one record short
+— the last reply lands after. TranscriptReader re-reads once, 2s later. Verified by
+mapping record byte offsets against the stored cursor.
+
+### Order events by ts, not seq
+Transcript records are ingested late but carry a real timestamp. Sequence numbers
+reflect insertion order, so ordering by seq put the model's "I'll read the file"
+after the read. `findBySession` orders by `ts, seq`, and the frontend store sorts
+the same way.
+
 ### The default JDK on this machine is 11
 Spring Boot 3 needs 17+. The `./acc` script resolves 21 via `/usr/libexec/java_home`.
 

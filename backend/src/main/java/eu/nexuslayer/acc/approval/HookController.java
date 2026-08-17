@@ -59,6 +59,7 @@ public class HookController {
     @PostMapping("/post-tool-use")
     public ResponseEntity<Map<String, Object>> postToolUse(@RequestBody JsonNode body) {
         adoption.recordToolResult(body);
+        adoption.syncTranscript(body);
         return ResponseEntity.ok(Map.of("continue", true));
     }
 
@@ -70,7 +71,7 @@ public class HookController {
 
     @PostMapping("/session-start")
     public ResponseEntity<Map<String, Object>> sessionStart(@RequestBody JsonNode body) {
-        adoption.adopt(body);
+        adoption.syncTranscript(body);
         return ResponseEntity.ok(Map.of("continue", true));
     }
 

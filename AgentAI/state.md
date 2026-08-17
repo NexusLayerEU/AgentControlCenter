@@ -31,6 +31,9 @@
 - Claude Code integration published in `claude-code/` with cross-platform installers
   and SKILLS.md; local ~/.claude copies kept identical to the repo.
 
+- Conversation capture: adopted sessions now record prompts, replies and token
+  usage from the Claude Code transcript, ordered chronologically.
+
 ## In Progress
 - Nothing.
 

@@ -95,7 +95,7 @@ class ApprovalServiceTest {
     private ApprovalService service(int timeoutSeconds, String unknownPolicy) {
         return new ApprovalService(repository, sessions, events,
                 (channel, payload) -> broadcasts.add(payload),
-                new AccProperties("/tmp/acc", "claude", timeoutSeconds, unknownPolicy));
+                new AccProperties("/tmp/acc", "claude", timeoutSeconds, unknownPolicy, true, 8000));
     }
 
     private AgentSession session(boolean autoApprove, String mode) {

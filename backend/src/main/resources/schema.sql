@@ -57,3 +57,11 @@ CREATE TABLE IF NOT EXISTS approvals (
 
 CREATE INDEX IF NOT EXISTS idx_approvals_session ON approvals (session_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_approvals_status  ON approvals (status);
+
+-- How far we have read each Claude Code transcript. A separate table rather than
+-- a column on sessions so restarts resume mid-file without re-emitting events.
+CREATE TABLE IF NOT EXISTS transcript_cursors (
+    claude_session_id TEXT PRIMARY KEY,
+    byte_offset       INTEGER NOT NULL DEFAULT 0,
+    updated_at        INTEGER NOT NULL
+);

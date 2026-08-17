@@ -47,16 +47,18 @@ public class AdoptionService {
     private final SessionService sessionService;
     private final EventService events;
     private final Broadcaster broadcaster;
+    private final TranscriptReader transcripts;
 
     /** claudeSessionId + tool_use_id -> the TOOL_CALL awaiting its PostToolUse. */
     private final Map<String, AgentEvent> openCalls = new ConcurrentHashMap<>();
 
     public AdoptionService(SessionRepository sessions, SessionService sessionService,
-            EventService events, Broadcaster broadcaster) {
+            EventService events, Broadcaster broadcaster, TranscriptReader transcripts) {
         this.sessions = sessions;
         this.sessionService = sessionService;
         this.events = events;
         this.broadcaster = broadcaster;
+        this.transcripts = transcripts;
     }
 
     /**
@@ -101,8 +103,22 @@ public class AdoptionService {
         return Optional.of(adopted);
     }
 
+    /**
+     * Reads any new conversation records for an adopted session. Called from every
+     * hook so prompts and replies land close to the tool calls they drove.
+     */
+    public void syncTranscript(JsonNode body) {
+        adopt(body).ifPresent(session -> {
+            if ("hook".equals(session.origin())) {
+                transcripts.ingest(session.id(), session.claudeSessionId(),
+                        Json.text(body, "transcript_path"));
+            }
+        });
+    }
+
     /** PreToolUse: open a TOOL_CALL node and wake the session if it was idle. */
     public void recordToolCall(JsonNode body) {
+        syncTranscript(body);
         adopt(body).ifPresent(session -> {
             if (!"hook".equals(session.origin())) {
                 return; // dispatched sessions already get this from the JSON stream
@@ -184,6 +200,11 @@ public class AdoptionService {
      */
     public void markIdle(JsonNode body) {
         adopt(body).ifPresent(session -> {
+            if ("hook".equals(session.origin())) {
+                // Stop runs before the final assistant message is flushed.
+                transcripts.ingestAfterTurn(session.id(), session.claudeSessionId(),
+                        Json.text(body, "transcript_path"));
+            }
             if ("hook".equals(session.origin()) && session.status() == SessionStatus.RUNNING) {
                 sessionService.mutate(session.id(), s -> s.withStatus(SessionStatus.IDLE));
             }

@@ -1,5 +1,29 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Conversations, not just tools.** Adopted sessions now record your prompts and
+  the model's replies, read from Claude Code's transcript, with the model name and
+  per-message token usage (input, output, cache read/write). Previously an adopted
+  session showed tool calls with no idea what was asked or answered.
+- `acc.capture-transcript` (default `true`) and `acc.transcript-text-limit` to
+  control or disable it — transcripts contain your full conversation.
+
+### Fixed
+
+- **Events are ordered by when they happened**, not when ACC read them. Transcript
+  records arrive after the tool calls they preceded, so the tree used to show the
+  model's "I'll read the file" *after* the read.
+
+### Known limits
+
+- The agent's **thinking** is not recoverable for adopted sessions: Claude Code
+  writes thinking blocks to the transcript with empty content and a signature only.
+- The literal API request (system prompt, tool schemas, full message array) is not
+  exposed by hooks or transcripts, so ACC cannot show it.
+
 ## 0.2.0
 
 ### Added

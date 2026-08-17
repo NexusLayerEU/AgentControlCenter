@@ -123,7 +123,8 @@ export const useStore = create((set, get) => ({
       return {
         timelines: {
           ...state.timelines,
-          [event.sessionId]: [...existing, event].sort((a, b) => a.seq - b.seq),
+          [event.sessionId]: // Chronological: transcript records arrive late but carry a real timestamp.
+          [...existing, event].sort((a, b) => a.ts - b.ts || a.seq - b.seq),
         },
       }
     })

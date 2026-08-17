@@ -23,7 +23,7 @@ class ClaudeRunnerTest {
 
     @BeforeEach
     void setUp() {
-        runner = new ClaudeRunner(new AccProperties("/tmp/acc", "claude", 50, "observe"), null);
+        runner = new ClaudeRunner(new AccProperties("/tmp/acc", "claude", 50, "observe", true, 8000), null);
     }
 
     private List<String> command(String mode, String model) {
@@ -90,7 +90,7 @@ class ClaudeRunnerTest {
     @DisplayName("the configured binary is honoured so a non-PATH install still works")
     void honoursConfiguredBinary() {
         ClaudeRunner custom = new ClaudeRunner(
-                new AccProperties("/tmp/acc", "/opt/bin/claude", 50, "observe"), null);
+                new AccProperties("/tmp/acc", "/opt/bin/claude", 50, "observe", true, 8000), null);
         assertEquals("/opt/bin/claude",
                 custom.buildCommand(new StartSessionRequest("n", "p", "/tmp", null, "default", null)).get(0));
     }

@@ -158,8 +158,34 @@ the header if you actually want it.
 |---|---|---|
 | Tool calls, inputs, results | ✅ | ✅ |
 | Diffs, durations, risk bands | ✅ | ✅ |
-| The agent's prose and thinking | ✅ | ❌ — hooks don't carry it |
-| Cost and turn count | ✅ | ❌ |
+| Your prompts | ✅ | ✅ from the transcript |
+| The model's replies | ✅ | ✅ from the transcript |
+| Per-message token usage | ❌ | ✅ from the transcript |
+| The agent's thinking | ✅ | ❌ — transcripts store thinking blocks empty |
+| Cost in USD, turn count | ✅ | ❌ |
+
+### Where the conversation comes from
+
+Hooks carry tool activity but nothing about the conversation. Each hook payload
+does include a `transcript_path`, so ACC tails that JSONL file and picks up your
+prompts, the model's replies, the model name and its token counts — skipping the
+tool blocks, which the hooks already recorded with better timing.
+
+Progress is stored as a byte offset per session, so a restart resumes mid-file
+rather than replaying. The last reply of a turn is written *after* the Stop hook
+runs, so ACC re-reads once, two seconds later, to catch it.
+
+**This means your conversations are stored in `~/.acc/acc.db`.** If you only want
+tool activity recorded, turn it off:
+
+```yaml
+acc:
+  capture-transcript: false
+```
+
+What is *not* available anywhere: the literal API request — the system prompt,
+tool schemas and full message array Claude Code sends. Neither hooks nor the
+transcript expose it.
 
 ---
 
@@ -254,9 +280,10 @@ Everything stays on your machine: `~/.acc/acc.db` holds your session history,
 `~/.acc/logs/` holds per-session stderr. No account, no cloud, no telemetry.
 Deleting `~/.acc` removes all of it.
 
-Note that activity trees contain **file contents and command output**, because
-that is the point. Treat `~/.acc/acc.db` as sensitive as the projects you point
-agents at.
+Note that activity trees contain **file contents, command output, your prompts
+and the model's replies**, because that is the point. Treat `~/.acc/acc.db` as at
+least as sensitive as the projects you point agents at. Set
+`capture-transcript: false` to keep conversations out of it.
 
 ---
 

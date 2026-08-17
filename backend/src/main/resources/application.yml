@@ -30,3 +30,8 @@ acc:
   # What to do with a hook from a session ACC did not launch and knows nothing about.
   # observe = record it and allow; gate = require approval like any other.
   unknown-session-policy: observe
+  # Read prompts, replies and thinking out of Claude Code's own transcript for
+  # sessions ACC did not launch. These contain your full conversation, so set
+  # this to false if you only want tool activity recorded.
+  capture-transcript: true
+  transcript-text-limit: 8000

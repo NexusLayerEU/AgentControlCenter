@@ -49,7 +49,10 @@ public class EventRepository {
     }
 
     public List<AgentEvent> findBySession(String sessionId) {
-        return jdbc.query("SELECT * FROM events WHERE session_id = ? ORDER BY seq ASC", MAPPER, sessionId);
+        // Ordered by when each thing happened. Transcript records are ingested late
+        // but carry their real timestamp, so seq alone would misplace them.
+        return jdbc.query("SELECT * FROM events WHERE session_id = ? ORDER BY ts ASC, seq ASC",
+                MAPPER, sessionId);
     }
 
     public Optional<AgentEvent> findByToolUseId(String sessionId, String toolUseId) {
