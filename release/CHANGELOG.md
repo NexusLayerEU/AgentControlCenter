@@ -28,6 +28,18 @@
   never reached it, because it animates in JavaScript — so the staggered reveals
   kept moving for anyone who had asked the system to stop.
 
+### Fixed
+
+- **The terminal never worked.** Opening TERM returned a 500 with
+  `ClassNotFoundException: jtermios.JTermios`. pty4j's `purejavacomm` dependency
+  was excluded during the very first build, on the incorrect assumption that it
+  was serial-port support unused by the PTY path — in fact `PtyHelpers` loads it
+  to open a PTY master on macOS and Linux. Excluding it compiles cleanly and fails
+  only at runtime, the first time anyone opens a terminal. It is published to the
+  JetBrains repo rather than Central, which is now declared in the pom.
+
+  **This affected every 0.2.0 bundle.** Re-download, or rebuild from source.
+
 ### Fixed (a bug-hunt pass)
 
 - **Adopted sessions stayed "active" forever.** Nothing moved them out of IDLE, so

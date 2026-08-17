@@ -159,6 +159,17 @@ the UI looks empty. Use `--virtual-time-budget=10000 --force-prefers-reduced-mot
 together: the first waits for the fetches, the second stops motion components
 being captured mid-fade. Verify with `--dump-dom` before assuming a UI bug.
 
+### pty4j needs purejavacomm — do not exclude it
+`com.pty4j.unix.PtyHelpers` loads `jtermios.JTermios` to open a PTY master on
+macOS and Linux. Excluding the dependency compiles fine and throws
+`NoClassDefFoundError` the first time a terminal is opened. It lives in the
+JetBrains repo (`cache-redirector.jetbrains.com/intellij-dependencies`), not
+Central, which is why it was excluded in the first place — the exclusion shipped a
+permanently broken TERM view for two releases.
+
+The wider lesson: a dependency exclusion made to fix a *build* failure needs the
+runtime path exercised before it is called safe. "Compiles" is not "works".
+
 ### SessionEnd is the real "window closed" signal
 Verified empirically: Claude Code fires `SessionEnd` with a `reason` field when a
 session ends (headless gives `reason=other`). Register it rather than inferring a
